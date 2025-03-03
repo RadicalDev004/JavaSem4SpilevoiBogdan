@@ -13,15 +13,16 @@ public class proj1 {
         k = Integer.parseInt(args[1]);
         
         long startTime = System.nanoTime();
-        System.out.println("Start");
+        System.out.println("Start AAA");
         
         
         Graph g = new Graph(n, k);
+        System.err.println(g.FindClique(6));
         
         if (n > 50)
         {
-            long endTime = System.nanoTime(); // End time
-            long duration = endTime - startTime; // Compute duration
+            long endTime = System.nanoTime();
+            long duration = endTime - startTime;
 
             System.out.println("Execution time: " + duration / 1_000_000.0 + " ms");
         }

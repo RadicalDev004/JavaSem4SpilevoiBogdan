@@ -2,6 +2,8 @@ package Helper;
 
 import java.util.*;
 
+//Spilevoi Bogdan
+
 public class Graph {
     private int n;
     private int k;
@@ -159,21 +161,24 @@ public class Graph {
             }
             System.out.println();
         }
-        for(var a : cliqueNodes.entrySet())
-        {
+        for (var a : cliqueNodes.entrySet()) {
             System.out.print(a.getKey() + " ");
         }
         System.out.println();
-        for(var a : setNodes.entrySet())
-        {
+        for (var a : setNodes.entrySet()) {
             System.out.print(a.getKey() + " ");
         }
         System.out.println();
-        for(var a : otherNodes.entrySet())
-        {
+        for (var a : otherNodes.entrySet()) {
             System.out.print(a.getKey() + " ");
         }
         System.out.println();
+    }
+    
+    public boolean FindClique(int k)
+    {
+        System.out.println(k + " ");
+        return Algo.CheckClique(matrix, k);
     }
     
     private boolean IntersectIndependentSet(int node)
