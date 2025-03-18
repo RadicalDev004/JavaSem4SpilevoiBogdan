@@ -2,19 +2,21 @@ package Aircrafts;
 
 public class Airliner extends Aircraft implements PassengerCapable {
 
-    public Airliner(String model, String name, Integer PassangerCapacity) {
+    private int passangerCapacity;
+
+    public Airliner(String model, String name, int passangerCapacity) {
         super(model, name);
-        this.PassangerCapacity = PassangerCapacity;
+        this.passangerCapacity = passangerCapacity;
     }
 
-    public Integer getPassangerCapacity() {
-        return PassangerCapacity;
+    public int getPassangerCapacity() {
+        return passangerCapacity;
     }
 
-    public void setPassangerCapacity(Integer passangerCapacity) {
-        PassangerCapacity = passangerCapacity;
+    public void setPassangerCapacity(int passangerCapacity) {
+        this.passangerCapacity = passangerCapacity;
     }
 
-    private Integer PassangerCapacity;
+
 
 }

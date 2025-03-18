@@ -1,19 +1,19 @@
 package Aircrafts;
 
 public class Drone extends Aircraft implements CargoCapable {
-    private Integer BatteryLife;
+    private int batteryLife;
 
-    public Drone(String model, String name, Integer BatteryLife) {
+    public Drone(String model, String name, int batteryLife) {
         super(model, name);
-        this.BatteryLife = BatteryLife;
+        this.batteryLife = batteryLife;
     }
 
 
-    public void setBatteryLife(Integer batteryLife) {
-        BatteryLife = batteryLife;
+    public void setBatteryLife(int batteryLife) {
+        this.batteryLife = batteryLife;
     }
 
-    public Integer getBatteryLife() {
-        return BatteryLife;
+    public int getBatteryLife() {
+        return batteryLife;
     }
 }

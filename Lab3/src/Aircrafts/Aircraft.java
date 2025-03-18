@@ -2,20 +2,20 @@ package Aircrafts;
 
 public abstract class Aircraft {
 
-    private String Model;
-    private String Name;
+    private String model;
+    private String name;
 
     public Aircraft(String model, String name) {
-        Model = model;
-        Name = name;
+        this.model = model;
+        this.name = name;
     }
 
     public String getModel() {
-        return Model;
+        return model;
     }
 
     public String getName() {
-        return Name;
+        return name;
     }
 
 }

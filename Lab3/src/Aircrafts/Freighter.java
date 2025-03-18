@@ -1,18 +1,18 @@
 package Aircrafts;
 
 public class Freighter extends  Aircraft implements CargoCapable {
-    private Integer MaximumPayload;
+    private int maximumPayload;
 
-    public Freighter(String model, String name, Integer MaximumPayload) {
+    public Freighter(String model, String name, int maximumPayload) {
         super(model, name);
-        this.MaximumPayload = MaximumPayload;
+        this.maximumPayload = maximumPayload;
     }
 
-    public Integer getMaximumPayload() {
-        return MaximumPayload;
+    public int getMaximumPayload() {
+        return maximumPayload;
     }
 
-    public void setMaximumPayload(Integer maximumPayload) {
-        MaximumPayload = maximumPayload;
+    public void setMaximumPayload(int maximumPayload) {
+        this.maximumPayload = maximumPayload;
     }
 }
