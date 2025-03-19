@@ -40,44 +40,49 @@ public class Schedule {
         }
     }
 
-    public void equitableScheduling() {
+    public void balancedScheduling() {
+        int extraNeeded = 0;
         List<Runway> runways = airport.getRunways();
-        int runwayCount = runways.size();
-        if (runwayCount == 0) {
+        if (runways.isEmpty()) {
             System.out.println("No runways available.");
             return;
         }
 
         flights.sort(Comparator.comparing(Flight::getArrivalStart));
 
-        Queue<Runway> queue = new LinkedList<>(runways);
-        Map<Runway, List<Flight>> schedule = new HashMap<>();
-        for (Runway r : runways) schedule.put(r, new ArrayList<>());
+        PriorityQueue<Runway> pq = new PriorityQueue<>(Comparator.comparingInt(r -> r.getArrivals().size()));
+
+        pq.addAll(runways);
 
         for (Flight flight : flights) {
-            Runway selectedRunway = queue.poll();
+            Runway bestRunway = null;
 
-            boolean assigned = false;
-            for (Runway r : runways) {
+            List<Runway> tempList = new ArrayList<>();
+            while (!pq.isEmpty()) {
+                Runway r = pq.poll();
                 if (!r.conflict(flight)) {
-                    schedule.get(r).add(flight);
-                    queue.offer(r);
-                    assigned = true;
+                    bestRunway = r;
                     break;
                 }
+                tempList.add(r);
             }
 
+            pq.addAll(tempList);
 
-            if (!assigned) {
-                System.out.println("Not enough runways! Need at least " + (flights.size() / 2 + 1) + " runways.");
-                return;
+            if (bestRunway == null) {
+                extraNeeded++;
+                Runway newRunway = new Runway("extra" + extraNeeded);
+                newRunway.addArrival(flight);
+                pq.offer(newRunway);
             }
+
+            bestRunway.addArrival(flight);
+            pq.offer(bestRunway);
         }
 
-        // Print schedule
         for (Runway r : runways) {
             System.out.print(r.getName() + " : [");
-            for (Flight fl : schedule.get(r)) {
+            for (Flight fl : r.getArrivals()) {
                 System.out.print("(" + fl.getAircraft().getName() + " - " + fl.getArrivalStart() + "), ");
             }
             System.out.println("]");
