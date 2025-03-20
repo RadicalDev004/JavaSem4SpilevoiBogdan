@@ -3,8 +3,8 @@ import Aircrafts.Aircraft;
 import java.util.*;
 
 public class Schedule {
-    private  Airport airport;
-    private  List<Flight> flights = new ArrayList<>();
+    private final Airport airport;
+    private final List<Flight> flights = new ArrayList<>();
 
     public Schedule(Airport airport, Flight... flights) {
         this.airport = airport;
@@ -76,7 +76,8 @@ public class Schedule {
                 pq.offer(newRunway);
             }
 
-            bestRunway.addArrival(flight);
+            if(bestRunway != null)
+                bestRunway.addArrival(flight);
             pq.offer(bestRunway);
         }
 

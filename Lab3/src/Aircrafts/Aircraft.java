@@ -18,4 +18,11 @@ public abstract class Aircraft {
         return name;
     }
 
+    public void setModel(String model) {
+        this.model = model;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }

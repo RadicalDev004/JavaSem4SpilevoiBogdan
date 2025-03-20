@@ -19,6 +19,14 @@ public class Airport {
         }
     }
 
+    public String getAirportName() {
+        return airportName;
+    }
+
+    public void setAirportName(String airportName) {
+        this.airportName = airportName;
+    }
+
     public List<Runway> getRunways() {
         return runways;
     }

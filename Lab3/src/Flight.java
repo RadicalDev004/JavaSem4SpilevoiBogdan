@@ -6,7 +6,7 @@ import java.time.LocalTime;
 
 public class Flight {
     private Aircraft aircraft;
-    Pair<LocalTime, LocalTime> arrivalTime;
+    private Pair<LocalTime, LocalTime> arrivalTime;
 
     public Flight(Aircraft aircraft, Pair<LocalTime, LocalTime> arrivalTime) {
         this.aircraft = aircraft;
@@ -29,5 +29,11 @@ public class Flight {
         return aircraft;
     }
 
+    public void setAircraft(Aircraft aircraft) {
+        this.aircraft = aircraft;
+    }
 
+    public void setArrivalTime(Pair<LocalTime, LocalTime> arrivalTime) {
+        this.arrivalTime = arrivalTime;
+    }
 }

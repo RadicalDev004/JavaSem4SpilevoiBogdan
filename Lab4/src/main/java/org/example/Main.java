@@ -14,14 +14,13 @@ public class Main {
                 new Location("Gamma", LocationType.enemy)
         );
 
-        TreeSet<Location> friendlyLocations = locations.stream()
+        Set<Location> friendlyLocations = locations.stream()
                 .filter(loc -> loc.getLocationType() == LocationType.friendly)
-                .sorted()
                 .collect(Collectors.toCollection(TreeSet::new));
 
         System.out.println("Friendly Locations (Sorted by Name): " + friendlyLocations);
 
-        LinkedList<Location> enemyLocations = locations.stream()
+        List<Location> enemyLocations = locations.stream()
                 .filter(loc -> loc.getLocationType() == LocationType.enemy)
                 .sorted(Comparator.comparing(Location::getName))
                 .collect(Collectors.toCollection(LinkedList::new));
@@ -29,3 +28,9 @@ public class Main {
         System.out.println("Enemy Locations (Sorted by Name): " + enemyLocations);
     }
 }
+
+
+
+
+
+//Floyd Warshall, Dijkstra
