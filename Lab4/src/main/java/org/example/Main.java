@@ -12,13 +12,20 @@ import java.util.stream.Collectors;
 
 public class Main {
     public static void main(String[] args) {
-        List<Location> locations = new ArrayList<>();
+
+        if(args.length != 1) {
+            System.out.println("Wrong parameter count.");
+        }
+        int nrOfLocations = Integer.parseInt(args[0]);
 
         Faker faker = new Faker();
         Random random = new Random();
+        Algo algo = new Algo();
+
+        List<Location> locations = new ArrayList<>();
         Graph<Location, LocationEdge> graph = new SimpleDirectedGraph<>(LocationEdge.class);
 
-        for(int i = 0; i < 10; i++)
+        for(int i = 0; i < nrOfLocations; i++)
         {
             Location newLoc = new Location(faker.name().firstName(), LocationType.fromValue(i % 3));
             locations.add(newLoc);
@@ -35,34 +42,56 @@ public class Main {
             }
             System.out.println();
         }
-
-        Function<LocationEdge, Double> weightFunction = edge -> (double) edge.getTime();
-
-        Graph<Location, LocationEdge> weightedGraph = new AsWeightedGraph<>(graph, weightFunction, true, false);
-
-        DijkstraShortestPath<Location, LocationEdge> dijkstra = new DijkstraShortestPath<>(weightedGraph);
-
-        Map<Pair<Location, Location>, Pair<GraphPath<Location, LocationEdge>, Double>> allRoutes = new HashMap<>();
-
-        Location start = locations.get(0);
-        for(int j = 1; j < locations.size(); j++)
-        {
-            allRoutes.put(new Pair<>(start, locations.get(j)), new Pair<>(dijkstra.getPath(start, locations.get(j)), dijkstra.getPathWeight(start, locations.get(j))));
-        }
-
         System.out.println("All locations " + locations);
+
+        Function<LocationEdge, Double> weightFunctionTime = edge -> (double) edge.getTime();
+        Map<Location, Pair<GraphPath<Location, LocationEdge>, Double>> allRoutes = algo.allRoutesFromStart(locations, graph, weightFunctionTime);
 
         Map<LocationType, List<Location>> locationsByType = locations.stream().collect(Collectors.groupingBy(Location::getLocationType));
 
         Map<LocationType, Optional<Double>> shortestPathsByType = allRoutes.entrySet().stream()
                 .collect(Collectors.groupingBy(
-                        entry -> entry.getKey().getSecond().getLocationType(),
+                        entry -> entry.getKey().getLocationType(),
                         Collectors.mapping(
                                 entry -> entry.getValue().getSecond(),
                                 Collectors.minBy(Comparator.comparingDouble(Double::doubleValue))
                         )
                 ));
         System.out.println("All min to all types " + shortestPathsByType);
+        System.out.println();
+
+
+
+        Function<LocationEdge, Double> weightFunction2 = edge -> 100 - (double) edge.getProbability();
+        Map<Pair<Location, Location>, Pair<GraphPath<Location, LocationEdge>, Double>> allRoutes2 = algo.allRoutes(locations, graph, weightFunction2);
+        Map<Pair<Location, Location>, Route> typesOfLocationsCount = new HashMap<>();
+
+        for(Pair<Location, Location> pair : allRoutes2.keySet())
+        {
+            Route route = new Route();
+            var path = allRoutes2.get(pair).getFirst();
+            for(var node : path.getVertexList())
+            {
+                route.addLocation(node.getLocationType());
+            }
+            typesOfLocationsCount.put(pair, route);
+            System.out.println(pair + " has " + route);
+        }
+
+        Optional<Map.Entry<Pair<Location, Location>, Route>> minFriendlyRoutes = typesOfLocationsCount.entrySet().stream()
+                .min(Comparator.comparingInt(entry ->
+                        entry.getValue().getFriendlyLocationCount()
+                ));
+        Optional<Map.Entry<Pair<Location, Location>, Route>> minEnemyRoutes = typesOfLocationsCount.entrySet().stream()
+                .min(Comparator.comparingInt(entry ->
+                        entry.getValue().getEnemyLocationCount()
+                ));
+        Optional<Map.Entry<Pair<Location, Location>, Route>> Neutral = typesOfLocationsCount.entrySet().stream()
+                .min(Comparator.comparingInt(entry ->
+                        entry.getValue().getNeutralLocationCount()
+                ));
+
+
 
         /*Set<Location> friendlyLocations = locations.stream()
                 .filter(loc -> loc.getLocationType() == LocationType.friendly)
