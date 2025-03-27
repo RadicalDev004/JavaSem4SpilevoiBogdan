@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class Algo {
 
@@ -20,14 +21,12 @@ public class Algo {
         DijkstraShortestPath<Location, LocationEdge> dijkstra = new DijkstraShortestPath<>(weightedGraph);
 
         Location start = locations.get(0);
-        for(int j = 1; j < locations.size(); j++)
-        {
-            var otherNode = locations.get(j);
-            var path = dijkstra.getPath(start, otherNode);
-            var pathWeight = dijkstra.getPathWeight(start, otherNode);
 
-            allRoutes.put(otherNode, new Pair<>(path, pathWeight));
-        }
+        allRoutes = locations.stream()
+                .collect(Collectors.toMap(
+                        otherNode -> otherNode,
+                        otherNode -> new Pair<>(dijkstra.getPath(start, otherNode), dijkstra.getPathWeight(start, otherNode))
+                ));
 
         return allRoutes;
     }

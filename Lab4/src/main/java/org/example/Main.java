@@ -40,10 +40,10 @@ public class Main {
                 graph.addEdge(locations.get(i), locations.get(j), locEdge);
                 System.out.print(locEdge + " | ");
             }
-            System.out.println();
+           // System.out.println();
         }
-        System.out.println("All locations " + locations);
-
+       // System.out.println("All locations " + locations);
+        System.out.println("Finished making");
         Function<LocationEdge, Double> weightFunctionTime = edge -> (double) edge.getTime();
         Map<Location, Pair<GraphPath<Location, LocationEdge>, Double>> allRoutes = algo.allRoutesFromStart(locations, graph, weightFunctionTime);
 
@@ -59,7 +59,6 @@ public class Main {
                 ));
         System.out.println("All min to all types " + shortestPathsByType);
         System.out.println();
-
 
 
         Function<LocationEdge, Double> weightFunction2 = edge -> 100 - (double) edge.getProbability();
