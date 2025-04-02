@@ -38,7 +38,7 @@ public class Main {
             {
                 try
                 {
-                    mode = stringToPersistance(command.split(" ")[1], manager);
+                    mode = stringToPersistence(command.split(" ")[1], manager);
                     continue;
                 }
                 catch (Exception e)
@@ -82,7 +82,7 @@ public class Main {
         }
     }
 
-    public static PersistenceMode stringToPersistance(String type, RepositoryManager manager) {
+    public static PersistenceMode stringToPersistence(String type, RepositoryManager manager) {
         return switch (type)
         {
             case "json" -> new JsonPersistence(manager);
