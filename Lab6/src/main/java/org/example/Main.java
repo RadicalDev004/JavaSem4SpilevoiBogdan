@@ -1,16 +1,17 @@
 package org.example;
 
-import org.example.panels.ConfigPanel;
-import org.example.panels.ControlPanel;
-import org.example.panels.DotsGame;
-import org.example.panels.DrawingPanel;
+import org.example.helper.GameManager;
+import org.example.panels.*;
 
 import javax.swing.*;
+import java.nio.file.Path;
 
 public class Main {
 
     public static void main(String[] args) {
-        DotsGame game = new DotsGame();
+        GameManager.savePath = Path.of("C:/Users/Bogdan S/OneDrive/Desktop/javaGame");
+
+        MenuWindow game = new MenuWindow();
         SwingUtilities.invokeLater(() -> game.setVisible(true));
     }
 }
