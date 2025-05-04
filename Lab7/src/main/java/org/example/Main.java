@@ -26,6 +26,14 @@ public class Main {
                     running = false;
                     break;
                 }
+                long elapsed = System.currentTimeMillis() - startTime;
+                System.out.println("Elapsed time: " + elapsed / 1000 + "s");
+
+                if (elapsed >= 1000 * 100) {
+                    System.out.println("Time limit reached. Ending game.");
+                    game.endGame();
+                    break;
+                }
             }
             try {
                 Thread.sleep(100);

@@ -1,8 +1,10 @@
-package org.example;
+package org.example.DAOs;
+import org.example.database.Database;
+
 import java.sql.*;
 
 public class ContinentDAO {
-    public void create (String name)  {
+    public void create (String name) throws SQLException {
         Connection con = Database.getConnection();
         try (PreparedStatement pstmt = con.prepareStatement( "insert into continents (name) values (?)")) {
             pstmt.setString(1, name); pstmt.executeUpdate();
@@ -14,7 +16,7 @@ public class ContinentDAO {
         }
     }
 
-    public Integer findByName (String name){
+    public Integer findByName (String name) throws SQLException {
         Connection con = Database.getConnection();
         try (Statement stmt = con.createStatement(); ResultSet rs = stmt.executeQuery( "select id from continents where name='" + name + "'")) {
             return rs.next() ? rs.getInt(1) : null;
@@ -25,7 +27,7 @@ public class ContinentDAO {
         }
     }
 
-    public String findById (int id) {
+    public String findById (int id) throws SQLException {
         Connection con = Database.getConnection();
         String sql = "SELECT name FROM continents WHERE id = ?";
         try (PreparedStatement pstmt = con.prepareStatement(sql)) {
