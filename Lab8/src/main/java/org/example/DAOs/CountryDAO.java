@@ -6,13 +6,12 @@ import java.sql.*;
 
 public class CountryDAO {
     public void create (String name, int code, String continent) throws SQLException {
-        Connection con = Database.getConnection();
-        try (PreparedStatement pstmt = con.prepareStatement( "insert into countries (name, code, continent) values (?, ?, ?)")) {
+        try (Connection con = Database.getConnection();PreparedStatement pstmt = con.prepareStatement( "insert into countries (name, code, continent) values (?, ?, ?)")) {
             pstmt.setString(1, name);
             pstmt.setInt(2, code);
             pstmt.setString(3, continent);
             pstmt.executeUpdate();
-            con.commit();
+            //con.commit();
         }
         catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -20,8 +19,7 @@ public class CountryDAO {
     }
 
     public Integer findByName (String name) throws SQLException {
-        Connection con = Database.getConnection();
-        try (Statement stmt = con.createStatement(); ResultSet rs = stmt.executeQuery( "select id from countries where name='" + name + "'")) {
+        try (Connection con = Database.getConnection(); Statement stmt = con.createStatement(); ResultSet rs = stmt.executeQuery( "select id from countries where name='" + name + "'")) {
             return rs.next() ? rs.getInt(1) : null;
         }
         catch (SQLException e) {
@@ -31,9 +29,8 @@ public class CountryDAO {
     }
 
     public String findById (int id) throws SQLException {
-        Connection con = Database.getConnection();
         String sql = "SELECT name FROM countries WHERE id = ?";
-        try (PreparedStatement pstmt = con.prepareStatement(sql)) {
+        try (Connection con = Database.getConnection();PreparedStatement pstmt = con.prepareStatement(sql)) {
             pstmt.setInt(1, id);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {

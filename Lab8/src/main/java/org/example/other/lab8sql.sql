@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS sister_cities;
 DROP TABLE IF EXISTS cities;
 DROP TABLE IF EXISTS countries;
 DROP TABLE IF EXISTS continents;
@@ -11,8 +12,7 @@ CREATE TABLE countries (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     code VARCHAR(10) NOT NULL UNIQUE,
-    continent_id INTEGER NOT NULL,
-    FOREIGN KEY (continent_id) REFERENCES continents(id)
+    continent_id INTEGER NOT NULL
 );
 
 CREATE TABLE cities (
@@ -21,6 +21,12 @@ CREATE TABLE cities (
     capital BOOLEAN NOT NULL,
     latitude DOUBLE PRECISION,
     longitude DOUBLE PRECISION,
-    country_id INTEGER NOT NULL,
-    FOREIGN KEY (country_id) REFERENCES countries(id)
+    country VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE sister_cities (
+    city1_id INT REFERENCES cities(id),
+    city2_id INT REFERENCES cities(id),
+    PRIMARY KEY (city1_id, city2_id),
+    CHECK (city1_id <> city2_id)
 );

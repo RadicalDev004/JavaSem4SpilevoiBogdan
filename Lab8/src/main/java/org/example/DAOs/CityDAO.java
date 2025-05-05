@@ -1,11 +1,27 @@
 package org.example.DAOs;
 
-import org.example.Pair;
+import org.example.helper.Pair;
 import org.example.database.Database;
 
 import java.sql.*;
 
 public class CityDAO {
+
+    public Integer cityLength() throws SQLException {
+        String sql = "SELECT count(*) FROM cities";
+
+        try (Connection con = Database.getConnection(); PreparedStatement pstmt = con.prepareStatement(sql)) {
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1); // or rs.getInt("count") if you use alias
+            }
+        } catch (SQLException e) {
+            System.out.println("Error in cityLength: " + e.getMessage());
+        }
+        return null;
+    }
+
+
     public void create (String name, int code, String continent) throws SQLException {
         Connection con = Database.getConnection();
         try (PreparedStatement pstmt = con.prepareStatement( "insert into cities (name, code, continent) values (?, ?, ?)")) {
@@ -13,7 +29,8 @@ public class CityDAO {
             pstmt.setInt(2, code);
             pstmt.setString(3, continent);
             pstmt.executeUpdate();
-            con.commit();
+            //con.commit();
+
         }
         catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -21,8 +38,8 @@ public class CityDAO {
     }
 
     public Integer findByName (String name) throws SQLException {
-        Connection con = Database.getConnection();
-        try (Statement stmt = con.createStatement(); ResultSet rs = stmt.executeQuery( "select id from cities where name='" + name + "'")) {
+
+        try (Connection con = Database.getConnection(); Statement stmt = con.createStatement(); ResultSet rs = stmt.executeQuery( "select id from cities where name='" + name + "'")) {
             return rs.next() ? rs.getInt(1) : null;
         }
         catch (SQLException e) {
@@ -32,8 +49,25 @@ public class CityDAO {
     }
 
     public Pair<Double, Double> getLocationByName (String name) throws SQLException {
-        Connection con = Database.getConnection();
-        try (Statement stmt = con.createStatement(); ResultSet rs = stmt.executeQuery( "select latitude, longitude from cities where name='" + name + "'")) {
+
+        try (Connection con = Database.getConnection();  Statement stmt = con.createStatement(); ResultSet rs = stmt.executeQuery( "select latitude, longitude from cities where name='" + name + "'")) {
+            if (rs.next()) {
+                double lat = rs.getDouble("latitude");
+                double lon = rs.getDouble("longitude");
+                return new Pair<>(lon, lat);
+            } else {
+                return null;
+            }
+        }
+        catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return null;
+        }
+    }
+
+    public Pair<Double, Double> getLocationById (int id) throws SQLException {
+
+        try (Connection con = Database.getConnection();  Statement stmt = con.createStatement(); ResultSet rs = stmt.executeQuery( "select latitude, longitude from cities where id='" + id + "'")) {
             if (rs.next()) {
                 double lat = rs.getDouble("latitude");
                 double lon = rs.getDouble("longitude");

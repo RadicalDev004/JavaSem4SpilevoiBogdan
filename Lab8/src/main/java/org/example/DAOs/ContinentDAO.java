@@ -5,11 +5,9 @@ import java.sql.*;
 
 public class ContinentDAO {
     public void create (String name) throws SQLException {
-        Connection con = Database.getConnection();
-        try (PreparedStatement pstmt = con.prepareStatement( "insert into continents (name) values (?)")) {
+        try (Connection con = Database.getConnection(); PreparedStatement pstmt = con.prepareStatement( "insert into continents (name) values (?)")) {
             pstmt.setString(1, name); pstmt.executeUpdate();
-            pstmt.executeUpdate();
-            con.commit();
+            //con.commit();
         }
         catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -17,8 +15,7 @@ public class ContinentDAO {
     }
 
     public Integer findByName (String name) throws SQLException {
-        Connection con = Database.getConnection();
-        try (Statement stmt = con.createStatement(); ResultSet rs = stmt.executeQuery( "select id from continents where name='" + name + "'")) {
+        try (Connection con = Database.getConnection(); Statement stmt = con.createStatement(); ResultSet rs = stmt.executeQuery( "select id from continents where name='" + name + "'")) {
             return rs.next() ? rs.getInt(1) : null;
         }
         catch (SQLException e) {
@@ -28,9 +25,8 @@ public class ContinentDAO {
     }
 
     public String findById (int id) throws SQLException {
-        Connection con = Database.getConnection();
         String sql = "SELECT name FROM continents WHERE id = ?";
-        try (PreparedStatement pstmt = con.prepareStatement(sql)) {
+        try (Connection con = Database.getConnection(); PreparedStatement pstmt = con.prepareStatement(sql)) {
             pstmt.setInt(1, id);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {

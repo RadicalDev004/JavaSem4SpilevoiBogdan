@@ -1,4 +1,4 @@
-package org.example;
+package org.example.helper;
 
 public class Pair<F, S> {
     private final F first;
