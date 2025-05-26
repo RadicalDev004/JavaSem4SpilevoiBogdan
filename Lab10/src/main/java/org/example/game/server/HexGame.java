@@ -14,10 +14,18 @@ public class HexGame {
     private boolean finished = false;
     private Instant lastMoveTime;
 
+    public boolean isFull() {
+        return full;
+    }
+
+    public Player[] getPlayers() {
+        return players;
+    }
+
     public HexGame(String gameId, Player creator, boolean ai) {
         this.gameId = gameId;
         this.players[0] = creator;
-        this.players[1] = creator;
+        this.players[1] = null;
         this.ai = ai;
         for (char[] row : board) Arrays.fill(row, '.');
         this.lastMoveTime = Instant.now();

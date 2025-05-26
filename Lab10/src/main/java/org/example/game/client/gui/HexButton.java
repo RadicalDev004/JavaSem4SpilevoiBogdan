@@ -1,4 +1,4 @@
-package org.example.game.client;
+package org.example.game.client.gui;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,8 +12,8 @@ public class HexButton extends JButton {
         setContentAreaFilled(false);
         setFocusPainted(false);
         setBorderPainted(false);
-        setMargin(new Insets(4, 4, 4, 4));
-        setPreferredSize(new Dimension(400, 400));
+        setMargin(new Insets(5, 5, 5, 5));
+        setPreferredSize(new Dimension(500, 500));
         setBackground(Color.WHITE);
     }
 
@@ -49,7 +49,7 @@ public class HexButton extends JButton {
         FontMetrics fm = g2.getFontMetrics();
         String text = getText();
         int tx = (w - fm.stringWidth(text)) / 2;
-        int ty = (h + fm.getAscent()) / 2 - 4;
+        int ty = (h + fm.getAscent()) / 2 - 3;
         g2.drawString(text, tx, ty);
 
         g2.dispose();

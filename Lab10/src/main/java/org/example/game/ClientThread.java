@@ -64,7 +64,9 @@ public class ClientThread extends Thread {
                                 GameManager.propagateBoardToAllObservers(gameId);
                                 if(result.contains("WON"))
                                 {
-                                    GameManager.propagateInfoToAllObservers(gameId, playerName + " won!");
+                                    GameManager.propagateInfoToAllObservers(gameId, "END");
+                                    GameManager.propagateInfoToAllObservers(gameId, "trivial");
+                                    GameManager.propagateInfoToAllObservers(gameId, playerName);
                                 }
                             }
                             else
@@ -77,13 +79,24 @@ public class ClientThread extends Thread {
                     case "list":
                         out.println(GameManager.listGames());
                         break;
-                    case "exit":
-                        out.println("Goodbye.");
+                    case "exited":
+                        GameManager.propagateInfoToAllObservers(gameId, "END");
+                        GameManager.propagateInfoToAllObservers(gameId, "exited");
+                        GameManager.propagateInfoToAllObservers(gameId, playerName);
                         break;
                     case "ai":
                         out.println(GameManager.createAIGame(tokens[1], tokens[2], Integer.parseInt(tokens[3]), out));
                         gameId = tokens[1];
                         playerName = tokens[2];
+                        break;
+                    case "room":
+                        out.println("ROOM");
+                        out.println(GameManager.getEmptyRoomForJoin());
+                        break;
+                    case "timeout":
+                        GameManager.propagateInfoToAllObservers(gameId, "END");
+                        GameManager.propagateInfoToAllObservers(gameId, "timeout");
+                        GameManager.propagateInfoToAllObservers(gameId, playerName);
                         break;
                     default:
                         out.println("Unknown command.");

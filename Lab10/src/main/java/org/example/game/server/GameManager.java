@@ -17,6 +17,17 @@ public class GameManager {
         return "Game created: " + gameId;
     }
 
+    public static synchronized String getEmptyRoomForJoin()
+    {
+        System.out.println(games.values());
+        for(var game: games.values())
+        {
+            System.out.println(game.getGameId() + " " + game.isFull());
+            if(!game.isFull()) return game.getGameId();
+        }
+        return "-";
+    }
+
     public static synchronized String createAIGame(String gameId, String playerName, int timeSeconds, PrintWriter out) {
         if (aiGames.containsKey(gameId)) return "Game already exists.";
         gameObservers.computeIfAbsent(gameId, k -> new ArrayList<>()).add(out);
@@ -30,6 +41,10 @@ public class GameManager {
         gameObservers.computeIfAbsent(gameId, k -> new ArrayList<>()).add(out);
         if (game == null) return "Game not found.";
         Player p = new Player(playerName, 'O', timeSeconds);
+        propagateInfoToAllObservers(gameId, "START");
+        Player other = game.getPlayers()[0];
+        System.out.println(other.getName() + "|" + playerName);
+        propagateInfoToAllObservers(gameId, other.getName() + "|" + playerName);
         return game.join(p) ? "Joined game: " + gameId : "Game full.";
     }
 
@@ -84,6 +99,24 @@ public class GameManager {
             game = aiGames.get(gameId);
             if(game == null) return;
             for (PrintWriter observer : gameObservers.get(gameId)) {
+                observer.println(info);
+            }
+        }
+    }
+
+    public  static synchronized void propagateInfoToAllObserversExcept(String gameId, String info, PrintWriter exclude) {
+        HexGame game = games.get(gameId);
+        if(game != null) {
+            for (PrintWriter observer : gameObservers.get(gameId)) {
+                if(exclude == observer) continue;
+                observer.println(info);
+            }
+        }
+        else{
+            game = aiGames.get(gameId);
+            if(game == null) return;
+            for (PrintWriter observer : gameObservers.get(gameId)) {
+                if(exclude == observer) continue;
                 observer.println(info);
             }
         }
