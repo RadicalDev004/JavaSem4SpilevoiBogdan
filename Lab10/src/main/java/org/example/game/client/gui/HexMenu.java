@@ -1,8 +1,16 @@
 package org.example.game.client.gui;
 
+import org.example.game.database.Database;
+import org.example.game.helper.Pair;
+
 import javax.swing.*;
 import java.awt.*;
+import java.util.*;
 import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class HexMenu extends JFrame {
     private final JButton playButton = new JButton("Play");
@@ -97,15 +105,18 @@ public class HexMenu extends JFrame {
         settingsTitle.setFont(new Font("SansSerif", Font.BOLD, 32));
         settingsTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        JLabel winsLabel = new JLabel("Wins: 0");
+        int wins = getWonGamesById(LoginScreen.userId);
+        JLabel winsLabel = new JLabel("Wins: " + String.valueOf(wins));
         winsLabel.setFont(new Font("SansSerif", Font.PLAIN, 20));
         winsLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        JLabel lossesLabel = new JLabel("Losses: 0");
+        int losses = getLostGamesById(LoginScreen.userId);
+        JLabel lossesLabel = new JLabel("Losses: " + String.valueOf(losses));
         lossesLabel.setFont(new Font("SansSerif", Font.PLAIN, 20));
         lossesLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        JLabel pointsLabel = new JLabel("Points: 0");
+        int points = wins * 30 - losses * 20;
+        JLabel pointsLabel = new JLabel("Points: " + String.valueOf(Math.max(points, 0)));
         pointsLabel.setFont(new Font("SansSerif", Font.PLAIN, 20));
         pointsLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
@@ -133,18 +144,18 @@ public class HexMenu extends JFrame {
         leaderboardPanel.add(leaderboardTitle, BorderLayout.NORTH);
 
 
-        //TODO Add players
-        String[] players = {"Alice", "Bob", "Charlie", "Diana", "Eve"};
-        int[] points = {1500, 1400, 1300, 1200, 1100};
 
         JPanel playersList = new JPanel();
         playersList.setLayout(new BoxLayout(playersList, BoxLayout.Y_AXIS));
-        for (int i = 0; i < players.length; i++) {
+
+        var top = getTopGames();
+
+        for (int i = 0; i < top.size(); i++) {
             JPanel playerPanel = new JPanel(new GridLayout(1, 3));
             playerPanel.setMaximumSize(new Dimension(600, 30));
             playerPanel.add(new JLabel((i + 1) + ".", SwingConstants.LEFT));
-            playerPanel.add(new JLabel(players[i], SwingConstants.CENTER));
-            playerPanel.add(new JLabel(points[i] + " pts", SwingConstants.RIGHT));
+            playerPanel.add(new JLabel(top.get(i).getFirst(), SwingConstants.CENTER));
+            playerPanel.add(new JLabel(top.get(i).getSecond() + " pts", SwingConstants.RIGHT));
             playersList.add(playerPanel);
         }
 
@@ -185,4 +196,96 @@ public class HexMenu extends JFrame {
         }
         return "main";
     }
+
+    private java.util.List<Pair<String, Integer>> getTopGames() {
+        java.util.List<Pair<String, Integer>> top = new java.util.ArrayList<>();
+        String sql = """
+    SELECT 
+        u.username,
+        u.id,
+        SUM(CASE 
+            WHEN (g.result = 1 AND g.user1_id = u.id) OR (g.result = 0 AND g.user2_id = u.id) THEN 1 
+            ELSE 0 
+        END) AS wins,
+        SUM(CASE 
+            WHEN (g.result = 0 AND g.user1_id = u.id) OR (g.result = 1 AND g.user2_id = u.id) THEN 1 
+            ELSE 0 
+        END) AS losses,
+        30 * SUM(CASE 
+            WHEN (g.result = 1 AND g.user1_id = u.id) OR (g.result = 0 AND g.user2_id = u.id) THEN 1 
+            ELSE 0 
+        END)
+        - 20 * SUM(CASE 
+            WHEN (g.result = 0 AND g.user1_id = u.id) OR (g.result = 1 AND g.user2_id = u.id) THEN 1 
+            ELSE 0 
+        END) AS score
+    FROM games g
+    JOIN users u ON u.id IN (g.user1_id, g.user2_id)
+    GROUP BY u.username, u.id
+    ORDER BY score DESC
+    LIMIT 25
+    """;
+
+
+        try (Connection con = Database.getConnection();
+             PreparedStatement stmt = con.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                String username = rs.getString("username");
+                int wins = rs.getInt("wins");
+                int score = rs.getInt("score");
+                top.add(new Pair<>(username, Math.max(score, 0)));
+            }
+
+        } catch (SQLException e) {
+        }
+        return top;
+    }
+
+    public int getWonGamesById(int userId) {
+        String sql = """
+        SELECT COUNT(*) AS wins
+        FROM games
+        WHERE (user1_id = ? AND result = 1)
+           OR (user2_id = ? AND result = 0)
+        """;
+
+        try (Connection con = Database.getConnection();
+             PreparedStatement stmt = con.prepareStatement(sql)) {
+            stmt.setInt(1, userId);
+            stmt.setInt(2, userId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("wins");
+            }
+        } catch (SQLException e) {
+            System.out.println("Error in getWonGamesById: " + e.getMessage());
+        }
+        return 0;
+    }
+
+    public int getLostGamesById(int userId) {
+        String sql = """
+        SELECT COUNT(*) AS losses
+        FROM games
+        WHERE (user1_id = ? AND result = 0)
+           OR (user2_id = ? AND result = 1)
+        """;
+
+        try (Connection con = Database.getConnection();
+             PreparedStatement stmt = con.prepareStatement(sql)) {
+            stmt.setInt(1, userId);
+            stmt.setInt(2, userId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("losses");
+            }
+        } catch (SQLException e) {
+            System.out.println("Error in getLostGamesById: " + e.getMessage());
+        }
+        return 0;
+    }
+
+
 }

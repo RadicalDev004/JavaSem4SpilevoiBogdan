@@ -1,17 +1,20 @@
 package org.example.game.client.gui;
 
 import org.example.game.client.GameClient;
+import org.example.game.client.dao.UserDao;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.sql.SQLException;
 
 public class LoginScreen extends JFrame {
     private final JTextField usernameField = new JTextField(20);
     private final JPasswordField passwordField = new JPasswordField(20);
     private final JButton submitButton = new JButton("Login");
-    private final JLabel infoLabel = new JLabel("", SwingConstants.CENTER); // New info label
-    private Timer clearInfoTimer; // Timer to clear message
+    private final JLabel infoLabel = new JLabel("", SwingConstants.CENTER);
+    private Timer clearInfoTimer;
+    public static Integer userId;
 
     public LoginScreen() {
         setTitle("Hex Game Login");
@@ -43,13 +46,34 @@ public class LoginScreen extends JFrame {
                 showInfo("Username or password cannot be empty.");
                 return;
             }
-            
-            if (!username.equalsIgnoreCase("testuser")) {
-                showInfo("User does not exist!");
+
+            UserDao userDao = new UserDao();
+            try {
+                if(!userDao.getAllUsernames().contains(username))
+                {
+                    userDao.create(username, password);
+                    return;
+                }
+                else
+                {
+                    if(!userDao.getPasswordByUsername(username).equals(password))
+                    {
+                        showInfo("Username or password does not match.");
+                        return;
+                    }
+                }
+                userId = UserDao.getUserIdByUsername(username);
+                if(userId == null)
+                {
+                    showInfo("User not found.");
+                    return;
+                }
+            } catch (SQLException ex) {
+                showInfo("Something went wrong. Try again?");
                 return;
             }
 
-            // If successful login:
+
             GameClient.hexMenu = new HexMenu(username, el -> GameClient.connectToServer());
             dispose();
         });

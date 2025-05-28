@@ -1,7 +1,14 @@
 package org.example.game.server;
 
+import org.example.game.client.dao.UserDao;
+import org.example.game.database.Database;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.Objects;
 
 public class HexGame {
     private final String gameId;
@@ -69,6 +76,10 @@ public class HexGame {
         if (hasPlayerWon(current.getSymbol())) {
             onWin = "WON";
             finished = true;
+            if(!ai)
+            {
+                saveGameToDatabase(players[0].getName(), players[1].getName(), Objects.equals(playerName, players[0].getName()) ? 1 : 0);
+            }
         }
 
         currentPlayerIndex = 1 - currentPlayerIndex;
@@ -160,6 +171,36 @@ public class HexGame {
 
         return false;
     }
+
+    public void saveGameToDatabase(String user1, String user2, int result) {
+        String sql = "INSERT INTO games (user1_id, user2_id, result) VALUES (?, ?, ?)";
+
+
+        Integer user1Id = null, user2Id = null;
+        try {
+            user1Id = UserDao.getUserIdByUsername(user1);
+            user2Id = UserDao.getUserIdByUsername(user2);
+
+            if (user1Id == null) user1Id = -1;
+            if (user2Id == null) user2Id = -1;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        try (Connection con = Database.getConnection();
+             PreparedStatement stmt = con.prepareStatement(sql)) {
+
+            stmt.setInt(1, user1Id);
+            stmt.setInt(2, user2Id);
+            stmt.setInt(3, result);
+            stmt.executeUpdate();
+
+            System.out.println("Game saved to database.");
+        } catch (SQLException e) {
+            System.out.println("Error in saveGameToDatabase: " + e.getMessage());
+        }
+    }
+
 
 }
 
