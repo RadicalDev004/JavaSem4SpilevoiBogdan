@@ -4,6 +4,15 @@ public class Country {
 
     private Long id;
     private String name;
+    private Integer color;
+
+    public Integer getColor() {
+        return color;
+    }
+
+    public void setColor(Integer color) {
+        this.color = color;
+    }
 
     public Country() {}
 
@@ -12,7 +21,6 @@ public class Country {
         this.name = name;
     }
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }

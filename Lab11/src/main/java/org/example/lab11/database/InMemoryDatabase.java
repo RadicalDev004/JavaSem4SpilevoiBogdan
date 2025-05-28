@@ -11,6 +11,9 @@ public class InMemoryDatabase {
     private final List<City> cityList = new ArrayList<>();
     private final AtomicLong cityIdGenerator = new AtomicLong();
 
+    private final List<Country> countryList = new ArrayList<>();
+    private final AtomicLong countryIdGenerator = new AtomicLong();
+
     public List<City> getAllCities() {
         return new ArrayList<>(cityList);
     }
@@ -35,9 +38,7 @@ public class InMemoryDatabase {
         return cityList.removeIf(city -> city.getId().equals(id));
     }
 
-    // Countries
-    private final List<Country> countryList = new ArrayList<>();
-    private final AtomicLong countryIdGenerator = new AtomicLong();
+
 
     public List<Country> getAllCountries() {
         return new ArrayList<>(countryList);
