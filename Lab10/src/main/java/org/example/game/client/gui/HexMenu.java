@@ -1,10 +1,12 @@
 package org.example.game.client.gui;
 
+import org.example.game.client.HexGameReportGenerator;
 import org.example.game.database.Database;
 import org.example.game.helper.Pair;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
 import java.util.*;
 import java.awt.event.ActionListener;
 import java.sql.Connection;
@@ -25,6 +27,7 @@ public class HexMenu extends JFrame {
     private JPanel mainPanel;
     private JPanel settingsPanel;
     private JPanel leaderboardPanel;
+    private JPanel previousGamesPanel;
 
     public HexMenu(String username) {
         this(username, null);
@@ -72,6 +75,21 @@ public class HexMenu extends JFrame {
             }
         });
         topPanel.add(leaderboardButton, BorderLayout.EAST);
+
+        JButton previousGamesButton = new JButton("Previous Games");
+        previousGamesButton.setPreferredSize(new Dimension(160, 40));
+        previousGamesButton.addActionListener(e -> {
+            String currentCard = getCurrentCard();
+            if (currentPanel != 3) {
+                loadPreviousGames();
+                cardLayout.show(centerPanel, "previousGames");
+                currentPanel = 3;
+            } else {
+                cardLayout.show(centerPanel, "main");
+                currentPanel = 0;
+            }
+        });
+        topPanel.add(previousGamesButton, BorderLayout.SOUTH);
 
         add(topPanel, BorderLayout.NORTH);
 
@@ -143,6 +161,16 @@ public class HexMenu extends JFrame {
         leaderboardTitle.setFont(new Font("SansSerif", Font.BOLD, 32));
         leaderboardPanel.add(leaderboardTitle, BorderLayout.NORTH);
 
+        // Previous Games Panel
+        previousGamesPanel = new JPanel(new BorderLayout());
+
+        JLabel previousGamesTitle = new JLabel("Previous Games", SwingConstants.CENTER);
+        previousGamesTitle.setFont(new Font("SansSerif", Font.BOLD, 32));
+        previousGamesPanel.add(previousGamesTitle, BorderLayout.NORTH);
+
+        JScrollPane previousGamesScrollPane = new JScrollPane();
+        previousGamesPanel.add(previousGamesScrollPane, BorderLayout.CENTER);
+
 
 
         JPanel playersList = new JPanel();
@@ -165,6 +193,7 @@ public class HexMenu extends JFrame {
         centerPanel.add(mainPanel, "main");
         centerPanel.add(settingsPanel, "settings");
         centerPanel.add(leaderboardPanel, "leaderboard");
+        centerPanel.add(previousGamesPanel, "previousGames");
         add(centerPanel, BorderLayout.CENTER);
 
         cardLayout.show(centerPanel, "main");
@@ -286,6 +315,72 @@ public class HexMenu extends JFrame {
         }
         return 0;
     }
+
+    private void loadPreviousGames() {
+        JPanel gamesList = new JPanel();
+        gamesList.setLayout(new BoxLayout(gamesList, BoxLayout.Y_AXIS));
+
+        String sql = """
+        SELECT g.id, u1.username AS user1, u2.username AS user2, g.result
+        FROM games g
+        LEFT JOIN users u1 ON g.user1_id = u1.id
+        LEFT JOIN users u2 ON g.user2_id = u2.id
+        WHERE g.user1_id = ? OR g.user2_id = ?
+        ORDER BY g.id DESC
+    """;
+
+        try (Connection con = Database.getConnection();
+             PreparedStatement stmt = con.prepareStatement(sql)) {
+
+            stmt.setInt(1, LoginScreen.userId);
+            stmt.setInt(2, LoginScreen.userId);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                int gameId = rs.getInt("id");
+                String user1 = rs.getString("user1");
+                String user2 = rs.getString("user2");
+                int result = rs.getInt("result");
+
+                String winner = (result == 1) ? user1 : user2;
+
+                JPanel gamePanel = new JPanel();
+                gamePanel.setLayout(new BoxLayout(gamePanel, BoxLayout.Y_AXIS));
+                gamePanel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
+                gamePanel.setBackground(Color.WHITE);
+
+                JLabel infoLabel = new JLabel("<html><b>Game ID:</b> " + gameId +
+                        "<br><b>Players:</b> " + user1 + " vs " + user2 +
+                        "<br><b>Winner:</b> " + winner + "</html>");
+                infoLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
+
+                JButton viewButton = new JButton("View Game Board");
+                viewButton.setAlignmentX(Component.LEFT_ALIGNMENT);
+                viewButton.addActionListener(e -> {
+                    String path = "game_" + gameId + "_report.html";
+                    HexGameReportGenerator.generateReport(gameId, path);
+                });
+
+                gamePanel.add(infoLabel);
+                gamePanel.add(Box.createVerticalStrut(5));
+                gamePanel.add(viewButton);
+                gamePanel.setMaximumSize(new Dimension(700, 100));
+
+                gamesList.add(gamePanel);
+                gamesList.add(Box.createVerticalStrut(10));
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error loading previous games: " + e.getMessage());
+        }
+
+        JScrollPane scrollPane = new JScrollPane(gamesList);
+        previousGamesPanel.remove(1); // remove old scroll pane
+        previousGamesPanel.add(scrollPane, BorderLayout.CENTER);
+        previousGamesPanel.revalidate();
+        previousGamesPanel.repaint();
+    }
+
 
 
 }

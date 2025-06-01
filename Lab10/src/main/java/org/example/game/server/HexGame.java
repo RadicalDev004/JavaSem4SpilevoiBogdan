@@ -173,7 +173,7 @@ public class HexGame {
     }
 
     public void saveGameToDatabase(String user1, String user2, int result) {
-        String sql = "INSERT INTO games (user1_id, user2_id, result) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO games (user1_id, user2_id, result, board) VALUES (?, ?, ?, ?)";
 
 
         Integer user1Id = null, user2Id = null;
@@ -193,6 +193,7 @@ public class HexGame {
             stmt.setInt(1, user1Id);
             stmt.setInt(2, user2Id);
             stmt.setInt(3, result);
+            stmt.setString(4, printBoard());
             stmt.executeUpdate();
 
             System.out.println("Game saved to database.");
